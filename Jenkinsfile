@@ -2,39 +2,54 @@ pipeline {
     agent any
 
     environment {
-        IMAGE = "DOCKERHUB_USERNAME/cloudnative-backend:latest"
+        IMAGE = "ak00721/cloudnative-backend:latest"
     }
 
     stages {
 
-        stage('Clone') {
+        stage('Checkout') {
             steps {
-                checkout scm
+                git branch: 'main',
+                url: 'https://github.com/kambleajinkya490-debug/cloud-native-cicd.git'
             }
         }
 
-        stage('Build') {
+        stage('Build Jar') {
             steps {
                 sh 'cd backend && mvn clean package'
             }
         }
 
-        stage('Docker Build') {
+        stage('Build Docker Image') {
             steps {
                 sh 'docker build -t $IMAGE ./backend'
             }
         }
 
-        stage('Docker Push') {
+        stage('Push Image') {
             steps {
-                sh 'docker push $IMAGE'
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub',
+                    usernameVariable: 'USER',
+                    passwordVariable: 'PASS'
+                )]) {
+                    sh '''
+                    echo $PASS | docker login -u $USER --password-stdin
+                    docker push $IMAGE
+                    '''
+                }
             }
         }
 
-        stage('Deploy EKS') {
-            steps {
-                sh 'kubectl apply -f k8s/'
-            }
-        }
+        stage('Deploy to EKS') {
+    steps {
+        sh '''
+        export AWS_PROFILE=default
+        export KUBECONFIG=/var/lib/jenkins/.kube/config
+
+        kubectl apply -f k8s/
+        '''
+    }
+}
     }
 }
