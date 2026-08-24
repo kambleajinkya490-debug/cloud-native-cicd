@@ -1,0 +1,11 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+
+# Jenkins
+target/
+
+# OS
+.DS_Store
