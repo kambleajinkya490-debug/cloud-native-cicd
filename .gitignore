@@ -1,11 +1,11 @@
+# Maven
+**/target/
+
 # Terraform
-.terraform/
+**/.terraform/*
 *.tfstate
 *.tfstate.*
 .terraform.lock.hcl
 
-# Jenkins
-target/
-
-# OS
-.DS_Store
+# Logs
+*.log
